@@ -7,7 +7,7 @@
 
 页面引用：
 -------------
-1. 页面底端引用<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=cQoqZZ4o1Yy96sEiIlIVkkek"></script>
+1. 页面底端引用 http://api.map.baidu.com/api?v=2.0&ak=cQoqZZ4o1Yy96sEiIlIVkkek
 2. 后引用最新版 /inc/Jquery.min.js#1.x.x
 3. 后引用 /jq/baidu_map.js
 
