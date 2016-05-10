@@ -20,8 +20,8 @@ var baidu_map = {
 
         var map = new BMap.Map(para.map_obj_id); // 创建地图实例 
 
-
-        if(para.enableScrollWheelZoom)
+        // 给定默认参数
+        if (para.enableScrollWheelZoom)
             map.enableScrollWheelZoom(); // 允许滚轮缩放
         if (para.NavigationControl)
             map.addControl(new BMap.NavigationControl()); // 左上角缩放尺
@@ -33,9 +33,11 @@ var baidu_map = {
             map.addControl(new BMap.MapTypeControl()); // 右上角地图种类
         if (para.CurrentCity)
             map.setCurrentCity(para.CurrentCity); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
-
         if (!para.PointKeywords && !para.SearchKeywords)
             para.PointKeywords = "北京天安门"
+
+        // 重写部分样式（和公司通用样式有冲突）
+        this.includeCSS("./inc/baidu_map.min.css");
 
         // 定点标注
         this.PointMarker(map, para);
@@ -71,5 +73,14 @@ var baidu_map = {
             renderOptions: { map: map }
         });
         local.search(para.SearchKeywords);
-    }
+    },
+
+    includeCSS: function(path) {
+        var a = document.createElement("link");
+        a.type = "text/css";
+        a.rel = "stylesheet";
+        a.href = path;
+        var head = document.getElementsByTagName("head")[0];
+        head.appendChild(a);
+    },
 };
