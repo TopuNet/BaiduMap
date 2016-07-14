@@ -1,38 +1,6 @@
-# 百度地图 JS插件 v2.0.1
-###兼容原生JS规范和AMD规范
+require(["baidu_map", "/inc/jquery.min.js"], function($baidu_map) {
 
-更新日志：
--------------
-
-v2.0.1
-
-1. 兼容原生JS和AMD规范
-2. 修改demo
-
-v1.1.1
-
-1. 加入样式文件，重写部分样式（和公司通用样式有冲突）
-
-文件结构：
--------------
-1. jq/baidu_map.js 放入项目文件夹jq（原生规范）或widget/lib（AMD规范）中
-2. inc中的样式文件 放入项目文件夹inc中
-
-页面引用：
--------------
-原生引用
-
-        1. 页面底端引用 http://api.map.baidu.com/api?v=2.0&ak=cQoqZZ4o1Yy96sEiIlIVkkek
-        2. 后引用最新版 /inc/Jquery.min.js#1.x.x
-        3. 后引用 /jq/baidu_map.js
-
-requireJS引用
-
-        依赖baidu_map.js和jquery.min.js#1.x，成功后返回对象baidu_map
-
-功能配置及启用：
---------------
-1. 调用方法：
+    $(function() {
 
         var baidu_map_para = {
             map_obj_id: "baidu_map", // 地图容器ID。无默认值。
@@ -50,5 +18,5 @@ requireJS引用
         }
 
         baidu_map.init(baidu_map_para);
-
-2. 在 jq/baidu_map.js line 41 可修改配套样式表路径
+    });
+});

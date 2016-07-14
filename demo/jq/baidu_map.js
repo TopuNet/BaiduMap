@@ -1,3 +1,4 @@
+// v1.1.1
 var baidu_map = {
     init: function(para) {
 
@@ -37,7 +38,7 @@ var baidu_map = {
             para.PointKeywords = "北京天安门"
 
         // 重写部分样式（和公司通用样式有冲突）
-        this.includeCSS("./inc/baidu_map.min.css");
+        includeCSS("./inc/baidu_map.min.css");
 
         // 定点标注
         this.PointMarker(map, para);
@@ -73,14 +74,20 @@ var baidu_map = {
             renderOptions: { map: map }
         });
         local.search(para.SearchKeywords);
-    },
-
-    includeCSS: function(path) {
-        var a = document.createElement("link");
-        a.type = "text/css";
-        a.rel = "stylesheet";
-        a.href = path;
-        var head = document.getElementsByTagName("head")[0];
-        head.appendChild(a);
-    },
+    }
 };
+
+if (typeof define === "function" && define.amd) {
+    define(["http://api.map.baidu.com/getscript?v=2.0&ak=cQoqZZ4o1Yy96sEiIlIVkkek"], function() {
+        return baidu_map;
+    });
+}
+
+function includeCSS(path) {
+    var a = document.createElement("link");
+    a.type = "text/css";
+    a.rel = "stylesheet";
+    a.href = path;
+    var head = document.getElementsByTagName("head")[0];
+    head.appendChild(a);
+}
