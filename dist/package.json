@@ -1,0 +1,22 @@
+{
+  "name": "TopuNet-BaiduMap",
+  "version": "2.0.2",
+  "description": "Topu.net 百度地图插件",
+  "main": "Readme.md",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TopuNet/BaiduMap.git"
+  },
+  "keywords": [
+    "topu.net"
+  ],
+  "author": "Topu.net",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TopuNet/BaiduMap/issues"
+  },
+  "homepage": "https://github.com/TopuNet/BaiduMap#readme"
+}
