@@ -1,21 +1,5 @@
-# 百度地图 JS插件 v2.0.2
-###兼容原生JS规范和AMD规范
-
-更新日志：
--------------
-v2.0.2
-
-        1. 在dist文件夹中，增加package.json
-        2. 将dist发布到npm：TopuNet-BaiduMap
-
-v2.0.1
-
-        1. 兼容原生JS和AMD规范
-        2. 修改demo
-
-v1.1.1
-
-        1. 加入样式文件，重写部分样式（和公司通用样式有冲突）
+# 百度地图 JS插件 v2.0.3
+###安装：npm install TopuNet-BaiduMap
 
 文件结构：
 -------------
@@ -56,3 +40,25 @@ requireJS引用
         baidu_map.init(baidu_map_para);
 
 2. 在 jq/baidu_map.js line 41 可修改配套样式表路径
+
+
+更新日志：
+-------------
+v2.0.3
+
+        1. 通过jshint验证
+
+v2.0.2
+
+        1. 在dist文件夹中，增加package.json
+        2. 将dist发布到npm：TopuNet-BaiduMap
+
+v2.0.1
+
+        1. 兼容原生JS和AMD规范
+        2. 修改demo
+
+v1.1.1
+
+        1. 加入样式文件，重写部分样式（和公司通用样式有冲突）
+        

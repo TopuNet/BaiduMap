@@ -1,4 +1,4 @@
-// v2.0.2
+// v2.0.3
 var baidu_map = {
     init: function(para) {
 
@@ -35,7 +35,7 @@ var baidu_map = {
         if (para.CurrentCity)
             map.setCurrentCity(para.CurrentCity); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
         if (!para.PointKeywords && !para.SearchKeywords)
-            para.PointKeywords = "北京天安门"
+            para.PointKeywords = "北京天安门";
 
         // 重写部分样式（和公司通用样式有冲突）
         includeCSS("./inc/baidu_map.min.css");
