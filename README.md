@@ -1,4 +1,4 @@
-# 百度地图 JS插件 v2.0.3
+# 百度地图 JS插件 v2.1.2
 ###安装：npm install TopuNet-BaiduMap
 
 文件结构：
@@ -24,6 +24,9 @@ requireJS引用
 
         var baidu_map_para = {
             map_obj_id: "baidu_map", // 地图容器ID。无默认值。
+            scroll_obj_selector: null, // overflow为scroll的外盒。
+                                        /* 当地图容器存在于一个overflow为scroll的外盒中时，
+                                        需开启入场后再加载地图功能，以防止气泡不显示。*/
             enableScrollWheelZoom: false, // 允许滚轮缩放。默认值：true
             NavigationControl: true, // 左上角缩放尺。默认值：true
             ScaleControl: false, // 左下角比例尺。默认值：true
@@ -44,8 +47,15 @@ requireJS引用
 
 更新日志：
 -------------
-v2.0.3
+v2.1.1 ~ v2.1.2
 
+        1. 增加参数scroll_obj_selector（overflow为scroll的外盒）
+            解决移动端使用固定高度和overflow为scroll的外盒、且地图在可视区域外加载时，气泡不显示的bug
+        2. 修改demo，增加demo_mobile.html
+        3. 修改readme，为新增加参数添加注释
+
+v2.0.3
+        
         1. 通过jshint验证
 
 v2.0.2

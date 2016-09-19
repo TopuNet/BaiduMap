@@ -1,9 +1,12 @@
-// v2.0.3
+// v2.1.2
 var baidu_map = {
     init: function(para) {
 
         var para_default = {
             map_obj_id: null, // 地图容器ID。无默认值。
+            scroll_obj_selector: null, // overflow为scroll的外盒。
+            /* 当地图容器存在于一个overflow为scroll的外盒中时，
+            需开启入场后再加载地图功能，以防止气泡不显示。*/
             enableScrollWheelZoom: true, // 允许滚轮缩放。默认值：true
             NavigationControl: true, // 左上角缩放尺。默认值：true
             ScaleControl: true, // 左下角比例尺。默认值：true
@@ -19,32 +22,77 @@ var baidu_map = {
 
         para = $.extend(para_default, para);
 
-        var map = new BMap.Map(para.map_obj_id); // 创建地图实例 
+        var showMap = function() {
 
-        // 给定默认参数
-        if (para.enableScrollWheelZoom)
-            map.enableScrollWheelZoom(); // 允许滚轮缩放
-        if (para.NavigationControl)
-            map.addControl(new BMap.NavigationControl()); // 左上角缩放尺
-        if (para.ScaleControl)
-            map.addControl(new BMap.ScaleControl()); // 左下角比例尺
-        if (para.OverviewMapControl)
-            map.addControl(new BMap.OverviewMapControl()); // 右下角小地图
-        if (para.MapTypeControl)
-            map.addControl(new BMap.MapTypeControl()); // 右上角地图种类
-        if (para.CurrentCity)
-            map.setCurrentCity(para.CurrentCity); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
-        if (!para.PointKeywords && !para.SearchKeywords)
-            para.PointKeywords = "北京天安门";
+            var map = new BMap.Map(para.map_obj_id); // 创建地图实例 
 
-        // 重写部分样式（和公司通用样式有冲突）
-        includeCSS("./inc/baidu_map.min.css");
+            // 给定默认参数
+            if (para.enableScrollWheelZoom)
+                map.enableScrollWheelZoom(); // 允许滚轮缩放
+            if (para.NavigationControl)
+                map.addControl(new BMap.NavigationControl()); // 左上角缩放尺
+            if (para.ScaleControl)
+                map.addControl(new BMap.ScaleControl()); // 左下角比例尺
+            if (para.OverviewMapControl)
+                map.addControl(new BMap.OverviewMapControl()); // 右下角小地图
+            if (para.MapTypeControl)
+                map.addControl(new BMap.MapTypeControl()); // 右上角地图种类
+            if (para.CurrentCity)
+                map.setCurrentCity(para.CurrentCity); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
+            if (!para.PointKeywords && !para.SearchKeywords)
+                para.PointKeywords = "北京天安门";
 
-        // 定点标注
-        this.PointMarker(map, para);
+            // 重写部分样式（和公司通用样式有冲突）
+            includeCSS("./inc/baidu_map.min.css");
 
-        // 关键词搜索
-        this.Search(map, para);
+            // 定点标注
+            this.PointMarker(map, para);
+
+            // 关键词搜索
+            this.Search(map, para);
+        };
+
+        var _this = this;
+
+        // console.log(para.scroll_obj_selector);
+
+        if (!para.scroll_obj_selector) {
+            showMap.apply(_this);
+        } else {
+
+            var map_top_px = $("#" + para.map_obj_id).position().top; // 地图盒初始top
+            var map_height_px = $("#" + para.map_obj_id).height(); // 地图盒高度
+            var wrapper_height_px = $(para.scroll_obj_selector).height(); // scroll盒高度
+
+            // mobile_stop_moved模块有重置scroll盒高度功能，so…首次赋值，比较盒高度和窗口高度，取小值
+            var window_height_px = $(window).height();
+            wrapper_height_px = wrapper_height_px < window_height_px ? wrapper_height_px : window_height_px;
+
+            var scrollTop_px; // 已滚动距离
+            var listenScroll = true; // 监听scroll，显示地图后，不再监听
+
+            // 测试地图盒是否已入场
+            var test = function() {
+                scrollTop_px = $(para.scroll_obj_selector).scrollTop();
+
+                // console.log(map_top_px + ":" + scrollTop_px + ":" + wrapper_height_px);
+                if (map_top_px - scrollTop_px < wrapper_height_px - map_height_px / 2) { // 减去地图盒高度的一半是为了兼容安卓微信浏览器。等于地图盒入场一半高度时，才会加载地图
+                    showMap.apply(_this);
+                    listenScroll = false;
+                }
+            };
+
+            // 监听scroll盒滚动
+            $(para.scroll_obj_selector).scroll(function() {
+                if (!listenScroll)
+                    return;
+                wrapper_height_px = $(para.scroll_obj_selector).height();
+                test();
+            });
+
+            // 打开页面时，先执行一次测试。如果地图盒在可视范围内，则直接显示。
+            test();
+        }
     },
 
     // 定点标注
