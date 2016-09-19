@@ -4,7 +4,7 @@ var baidu_map = {
 
         var para_default = {
             map_obj_id: null, // 地图容器ID。无默认值。
-            scroll_obj_selector: null, // overflow为scroll的外盒。
+            scroll_obj_selector: null, // overflow为scroll的外盒选择器。
             /* 当地图容器存在于一个overflow为scroll的外盒中时，
             需开启入场后再加载地图功能，以防止气泡不显示。*/
             enableScrollWheelZoom: true, // 允许滚轮缩放。默认值：true
