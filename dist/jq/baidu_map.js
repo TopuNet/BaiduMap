@@ -1,4 +1,4 @@
-// v2.1.2
+// v2.2.1
 var baidu_map = {
     init: function(para) {
 
@@ -9,7 +9,7 @@ var baidu_map = {
             需开启入场后再加载地图功能，以防止气泡不显示。*/
             enableScrollWheelZoom: true, // 允许滚轮缩放。默认值：true
             NavigationControl: true, // 左上角缩放尺。默认值：true
-            ScaleControl: true, // 左下角比例尺。默认值：true
+            ScaleControl: false, // 左下角比例尺。默认值：false
             OverviewMapControl: true, // 右下角小地图：true
             CurrentCity: "北京", // 当前城市。默认值：北京
             MapTypeControl: true, // 右上角地图种类，仅当设置当前城市后可用。默认值：true
@@ -26,6 +26,10 @@ var baidu_map = {
 
             var map = new BMap.Map(para.map_obj_id); // 创建地图实例 
 
+            // 重写样式
+            $("div.BMap_bubble_content span,div.BMap_bubble_content a").css("font-size", "12px!important");
+            $("div.BMap_bubble_content span img").css("display","inline!important");
+
             // 给定默认参数
             if (para.enableScrollWheelZoom)
                 map.enableScrollWheelZoom(); // 允许滚轮缩放
@@ -41,9 +45,6 @@ var baidu_map = {
                 map.setCurrentCity(para.CurrentCity); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
             if (!para.PointKeywords && !para.SearchKeywords)
                 para.PointKeywords = "北京天安门";
-
-            // 重写部分样式（和公司通用样式有冲突）
-            includeCSS("./inc/baidu_map.min.css");
 
             // 定点标注
             this.PointMarker(map, para);
@@ -129,13 +130,4 @@ if (typeof define === "function" && define.amd) {
     define(["http://api.map.baidu.com/getscript?v=2.0&ak=cQoqZZ4o1Yy96sEiIlIVkkek"], function() {
         return baidu_map;
     });
-}
-
-function includeCSS(path) {
-    var a = document.createElement("link");
-    a.type = "text/css";
-    a.rel = "stylesheet";
-    a.href = path;
-    var head = document.getElementsByTagName("head")[0];
-    head.appendChild(a);
 }
