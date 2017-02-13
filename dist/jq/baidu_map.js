@@ -100,8 +100,27 @@ var baidu_map = {
     PointMarker: function(map, para) {
         // 创建地址解析器实例
         var myGeo = new BMap.Geocoder();
+        if (para.PointKeywords.indexOf(",")){
+            var arr = para.PointKeywords.split(",");
+            for (var i=0; i<arr.length;i++){
+                // 将地址解析结果显示在地图上,并调整地图视野
+                myGeo.getPoint(arr[i], function(point) {
+                    if (point) {
+                        map.centerAndZoom(point, para.Zoom);
+                        var marker = new BMap.Marker(point); // 创建标注   
+                        if (para.PointBounce)
+                            //marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画 
+
+                        if (para.PointClick)
+                            marker.addEventListener("click", para.PointClick);
+
+                        map.addOverlay(marker);
+                    }
+                }, para.CurrentCity);
+            }
+        }
         // 将地址解析结果显示在地图上,并调整地图视野
-        myGeo.getPoint(para.PointKeywords, function(point) {
+       /* myGeo.getPoint(para.PointKeywords, function(point) {
             if (point) {
                 map.centerAndZoom(point, para.Zoom);
                 var marker = new BMap.Marker(point); // 创建标注   
@@ -113,7 +132,7 @@ var baidu_map = {
 
                 map.addOverlay(marker);
             }
-        }, para.CurrentCity);
+        }, para.CurrentCity);*/
     },
 
     // 关键词搜索
