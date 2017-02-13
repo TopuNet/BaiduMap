@@ -1,4 +1,4 @@
-// v2.2.1
+// v2.2.3
 var baidu_map = {
     init: function(para) {
 
@@ -13,9 +13,18 @@ var baidu_map = {
             OverviewMapControl: true, // 右下角小地图：true
             CurrentCity: "北京", // 当前城市。默认值：北京
             MapTypeControl: true, // 右上角地图种类，仅当设置当前城市后可用。默认值：true
-            PointKeywords: null, // 定点标注搜索。无默认值
-            PointBounce: true, // 定点标注跳动。默认值：true
-            PointClick: null, // 定点标注点击回调。无默认值
+            Points: [{
+                Keywords: "北京天安门",
+                Bounce: true,
+                click_callback: null
+            }], // 定点标注对象数组。
+            /*
+            默认值：[{
+                Keywords: "北京天安门",
+                Bounce: true,
+                click_callback: null
+            }]
+            */
             SearchKeywords: null, // 搜索关键词。无默认值
             Zoom: 16 // 默认缩放比例。默认值：16
         };
@@ -28,7 +37,7 @@ var baidu_map = {
 
             // 重写样式
             $("div.BMap_bubble_content span,div.BMap_bubble_content a").css("font-size", "12px!important");
-            $("div.BMap_bubble_content span img").css("display","inline!important");
+            $("div.BMap_bubble_content span img").css("display", "inline!important");
 
             // 给定默认参数
             if (para.enableScrollWheelZoom)
@@ -43,8 +52,6 @@ var baidu_map = {
                 map.addControl(new BMap.MapTypeControl()); // 右上角地图种类
             if (para.CurrentCity)
                 map.setCurrentCity(para.CurrentCity); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
-            if (!para.PointKeywords && !para.SearchKeywords)
-                para.PointKeywords = "北京天安门";
 
             // 定点标注
             this.PointMarker(map, para);
@@ -100,20 +107,36 @@ var baidu_map = {
     PointMarker: function(map, para) {
         // 创建地址解析器实例
         var myGeo = new BMap.Geocoder();
-        // 将地址解析结果显示在地图上,并调整地图视野
-        myGeo.getPoint(para.PointKeywords, function(point) {
-            if (point) {
-                map.centerAndZoom(point, para.Zoom);
-                var marker = new BMap.Marker(point); // 创建标注   
-                if (para.PointBounce)
-                    marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画 
 
-                if (para.PointClick)
-                    marker.addEventListener("click", para.PointClick);
+        // 遍历点，标注
+        var i = 0,
+            len = para.Points.length;
 
-                map.addOverlay(marker);
-            }
-        }, para.CurrentCity);
+        var makingPoints = (function() {
+
+            return function(_i) {
+                // 将地址解析结果显示在地图上,并调整地图视野
+                myGeo.getPoint(para.Points[_i].Keywords, function(point) {
+                    if (point) {
+                        if (_i === 0)
+                            map.centerAndZoom(point, para.Zoom);
+                        var marker = new BMap.Marker(point); // 创建标注   
+                        if (para.Points[_i].Bounce)
+                            marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画 
+
+                        if (para.Points[_i].click_callback)
+                            marker.addEventListener("click", para.Points[_i].click_callback);
+
+                        map.addOverlay(marker);
+                    }
+                }, para.CurrentCity);
+            };
+
+        })();
+
+        for (; i < len; i++) {
+            makingPoints(i);
+        }
     },
 
     // 关键词搜索

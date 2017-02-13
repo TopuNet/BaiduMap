@@ -1,6 +1,6 @@
 {
   "name": "TopuNet-BaiduMap",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Topu.net 百度地图插件",
   "main": "Readme.md",
   "scripts": {

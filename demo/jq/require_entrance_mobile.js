@@ -20,9 +20,17 @@ require(["baidu_map", "mobile_stop_moved", "landscape_mask", "/inc/zepto.min.js"
             OverviewMapControl: false, // 右下角小地图：true
             CurrentCity: "北京", // 当前城市。默认值：北京
             MapTypeControl: true, // 右上角地图种类，仅当设置当前城市后可用。默认值：true
-            PointKeywords: "盈科中心 北京市朝阳区工人体育场北路甲2号", // 定点标注搜索。无默认值
-            PointBounce: true, // 定点标注跳动。默认值：true
-            PointClick: function(e) {}, // 定点标注点击回调。无默认值。
+            Points: [{
+                Keywords: "盈科中心 北京市朝阳区工人体育场北路甲2号",
+                Bounce: true,
+                click_callback: null
+            }, {
+                Keywords: "美林大厦",
+                Bounce: false,
+                click_callback: function() {
+                    alert("这是美林大厦");
+                }
+            }],
             // SearchKeywords: "礼士宾馆", // 搜索关键词。无默认值
             Zoom: 16 // 默认缩放比例。默认值：16
         }
