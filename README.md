@@ -1,9 +1,10 @@
-# 百度地图 JS插件 v2.2.3
+# 百度地图 JS插件 v3.1.1
 ###安装：npm install TopuNet-BaiduMap
 
 文件结构：
 -------------
         1. jq/baidu_map.js 放入项目文件夹jq（原生规范）或widget/lib（AMD规范）中
+        2. demo中的demo.html为功能展现最全面的页面；demo_requireJs.html是amd规范的测试；demo_mobile.html是移动端测试
 
 页面引用：
 -------------
@@ -21,37 +22,60 @@ requireJS引用
 --------------
 1. 调用方法：
 
-        var baidu_map_para = {
-            map_obj_id: "baidu_map", // 地图容器ID。无默认值。
+        // 创建地图对象
+        var map1 = new baidu_map();
+
+        // 初始化地图。也可用此方法得到一个干净的地图。
+        map1.init({
+            map_obj_id: "baidu_map_1", // 地图容器ID。无默认值。
             scroll_obj_selector: null, // overflow为scroll的外盒选择器。
-                                        /* 当地图容器存在于一个overflow为scroll的外盒中时，
-                                        需开启入场后再加载地图功能，以防止气泡不显示。*/
-            enableScrollWheelZoom: false, // 允许滚轮缩放。默认值：true
+            /* 当地图容器存在于一个overflow为scroll的外盒中时，
+            需开启入场后再加载地图功能，以防止气泡不显示。*/
+            enableScrollWheelZoom: true, // 允许滚轮缩放。默认值：true
             NavigationControl: true, // 左上角缩放尺。默认值：true
             ScaleControl: false, // 左下角比例尺。默认值：false
-            OverviewMapControl: false, // 右下角小地图：true
+            OverviewMapControl: true, // 右下角小地图：true
             CurrentCity: "北京", // 当前城市。默认值：北京
             MapTypeControl: true, // 右上角地图种类，仅当设置当前城市后可用。默认值：true
-            Points: [{
-                Keywords: "盈科中心 北京市朝阳区工人体育场北路甲2号",
-                Bounce: true,
-                click_callback: null
-            }, {
-                Keywords: "美林大厦",
-                Bounce: false,
-                click_callback: function() {
-                    alert("这是美林大厦");
-                }
-            }],
-            // SearchKeywords: "礼士宾馆", // 搜索关键词。无默认值
-            Zoom: 16 // 默认缩放比例。默认值：16
-        }
+        });
 
-        baidu_map.init(baidu_map_para);
+        // 为地图增加气泡标记点，并将第一个标记点作为地图中心点，同时调整zoom。可反复调用。调用前如想清空地图，可调用init方法
+        map1.PointMarker({
+            Zoom: 14, // 调整地图的zoom
+            Points: [{
+                Keywords: "银河SOHO", // 关键词
+                Bounce: true, // 是否跳跃。当地图内有多个气泡时，偶发不跳跃的bug。后续增加的气泡均不能跳跃，true也无效。
+                click_callback: null // 点击气泡回调
+            }, {
+                Keywords: "悠唐生活广场",
+                Bounce: false,
+                click_callback: function(){
+                    console.log("这是悠唐生活广场");
+                }
+            }]
+        });
+
+        // 为地图增加搜索气泡标记点，地图自动调整中心点和zoom。可反复调用。调用前如想清空地图，可调用init方法
+        map1.Search({
+            SearchKeywords: "SOHO" // 关键词
+        });
+
+        // 创建第二个地图对象，后略
+        var map2 = new baidu_map();
+        map2.init({
+            map_obj_id: "baidu_map_2"
+        });
 
 
 更新日志：
 -------------
+v3.1.1
+
+        1. 重构，单页面内支持多个地图显示
+        2. 可多次调用气泡标记或关键词搜索方法，为地图增加气泡标记点
+        3. 可通过调用init方法清空已有地图（还原、重新初始化）
+        4. 修改demo
+
 v2.2.3
 
         1. 气泡标注点支持多个

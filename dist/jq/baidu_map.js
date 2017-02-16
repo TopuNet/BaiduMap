@@ -1,153 +1,186 @@
-// v2.2.3
-var baidu_map = {
-    init: function(para) {
+// v3.1.1
+/*
+    that:{
+        opt_init: init方法接收的参数,
+        map_obj: map对象,
 
-        var para_default = {
-            map_obj_id: null, // 地图容器ID。无默认值。
-            scroll_obj_selector: null, // overflow为scroll的外盒选择器。
-            /* 当地图容器存在于一个overflow为scroll的外盒中时，
-            需开启入场后再加载地图功能，以防止气泡不显示。*/
-            enableScrollWheelZoom: true, // 允许滚轮缩放。默认值：true
-            NavigationControl: true, // 左上角缩放尺。默认值：true
-            ScaleControl: false, // 左下角比例尺。默认值：false
-            OverviewMapControl: true, // 右下角小地图：true
-            CurrentCity: "北京", // 当前城市。默认值：北京
-            MapTypeControl: true, // 右上角地图种类，仅当设置当前城市后可用。默认值：true
-            Points: [{
-                Keywords: "北京天安门",
-                Bounce: true,
-                click_callback: null
-            }], // 定点标注对象数组。
-            /*
-            默认值：[{
-                Keywords: "北京天安门",
-                Bounce: true,
-                click_callback: null
-            }]
-            */
-            SearchKeywords: null, // 搜索关键词。无默认值
-            Zoom: 16 // 默认缩放比例。默认值：16
-        };
+    }
+*/
+function baidu_map() {
+    return {
+        // 初始化，一个地图盒只调用一次
+        init: function(opt) {
+            var that = this;
 
-        para = $.extend(para_default, para);
+            var opt_default = {
+                map_obj_id: null, // 地图容器ID。无默认值。
+                scroll_obj_selector: null, // overflow为scroll的外盒选择器。
+                /* 当地图容器存在于一个overflow为scroll的外盒中时，
+                需开启入场后再加载地图功能，以防止气泡不显示。*/
+                enableScrollWheelZoom: true, // 允许滚轮缩放。默认值：true
+                NavigationControl: true, // 左上角缩放尺。默认值：true
+                ScaleControl: false, // 左下角比例尺。默认值：false
+                OverviewMapControl: true, // 右下角小地图：true
+                CurrentCity: "北京", // 当前城市。默认值：北京
+                MapTypeControl: true, // 右上角地图种类，仅当设置当前城市后可用。默认值：true
+            };
+            that.opt_init = $.extend(opt_default, opt);
 
-        var showMap = function() {
+            // 创建map对象
+            that.createMap.apply(that);
 
-            var map = new BMap.Map(para.map_obj_id); // 创建地图实例 
+            // 设置地图属性
+            that.setMapAttr.apply(that);
+        },
+        // 创建map对象
+        createMap: function() {
+            var that = this;
+
+            that.map_obj = new BMap.Map(that.opt_init.map_obj_id); // 创建地图实例 
 
             // 重写样式
             $("div.BMap_bubble_content span,div.BMap_bubble_content a").css("font-size", "12px!important");
             $("div.BMap_bubble_content span img").css("display", "inline!important");
+        },
+        // 设置地图属性
+        setMapAttr: function(opt) {
+            var that = this;
 
-            // 给定默认参数
-            if (para.enableScrollWheelZoom)
-                map.enableScrollWheelZoom(); // 允许滚轮缩放
-            if (para.NavigationControl)
-                map.addControl(new BMap.NavigationControl()); // 左上角缩放尺
-            if (para.ScaleControl)
-                map.addControl(new BMap.ScaleControl()); // 左下角比例尺
-            if (para.OverviewMapControl)
-                map.addControl(new BMap.OverviewMapControl()); // 右下角小地图
-            if (para.MapTypeControl)
-                map.addControl(new BMap.MapTypeControl()); // 右上角地图种类
-            if (para.CurrentCity)
-                map.setCurrentCity(para.CurrentCity); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
+            if (that.opt_init.enableScrollWheelZoom)
+                that.map_obj.enableScrollWheelZoom(); // 允许滚轮缩放
+            if (that.opt_init.NavigationControl)
+                that.map_obj.addControl(new BMap.NavigationControl()); // 左上角缩放尺
+            if (that.opt_init.ScaleControl)
+                that.map_obj.addControl(new BMap.ScaleControl()); // 左下角比例尺
+            if (that.opt_init.OverviewMapControl)
+                that.map_obj.addControl(new BMap.OverviewMapControl()); // 右下角小地图
+            if (that.opt_init.MapTypeControl)
+                that.map_obj.addControl(new BMap.MapTypeControl()); // 右上角地图种类
+            if (that.opt_init.CurrentCity)
+                that.map_obj.setCurrentCity(that.opt_init.CurrentCity); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
+        },
+        // 根据参数决定直接执行方法；或是监听滚动，在确定地图入场后再执行方法。callback为要执行的方法
+        PrepareDoAction: function(callback) {
+            var that = this;
 
-            // 定点标注
-            this.PointMarker(map, para);
+            if (!that.opt_init.scroll_obj_selector) {
+                callback();
+            } else {
 
-            // 关键词搜索
-            this.Search(map, para);
-        };
+                var map_box = $("#" + that.opt_init.map_obj_id);
+                var wrapper_box = $(that.opt_init.scroll_obj_selector);
 
-        var _this = this;
+                var map_top_px = map_box.position().top; // 地图盒初始top
+                var map_height_px = map_box.height(); // 地图盒高度
+                var wrapper_height_px = wrapper_box.height(); // scroll盒高度
 
-        // console.log(para.scroll_obj_selector);
+                // mobile_stop_moved模块有重置scroll盒高度功能，so…首次赋值，比较盒高度和窗口高度，取小值
+                var window_height_px = $(window).height();
+                wrapper_height_px = wrapper_height_px < window_height_px ? wrapper_height_px : window_height_px;
 
-        if (!para.scroll_obj_selector) {
-            showMap.apply(_this);
-        } else {
+                var scrollTop_px; // 已滚动距离
+                var listenScroll = true; // 监听scroll，显示地图后，不再监听
 
-            var map_top_px = $("#" + para.map_obj_id).position().top; // 地图盒初始top
-            var map_height_px = $("#" + para.map_obj_id).height(); // 地图盒高度
-            var wrapper_height_px = $(para.scroll_obj_selector).height(); // scroll盒高度
+                // 测试地图盒是否已入场
+                var test = function() {
+                    scrollTop_px = wrapper_box.scrollTop();
 
-            // mobile_stop_moved模块有重置scroll盒高度功能，so…首次赋值，比较盒高度和窗口高度，取小值
-            var window_height_px = $(window).height();
-            wrapper_height_px = wrapper_height_px < window_height_px ? wrapper_height_px : window_height_px;
+                    // console.log(map_top_px + ":" + scrollTop_px + ":" + wrapper_height_px);
+                    if (map_top_px - scrollTop_px < wrapper_height_px - map_height_px / 2) { // 减去地图盒高度的一半是为了兼容安卓微信浏览器。等于地图盒入场一半高度时，才会加载地图
+                        callback();
+                        listenScroll = false;
+                    }
+                };
 
-            var scrollTop_px; // 已滚动距离
-            var listenScroll = true; // 监听scroll，显示地图后，不再监听
+                // 监听scroll盒滚动
+                wrapper_box.scroll(function() {
+                    if (!listenScroll)
+                        return;
+                    wrapper_height_px = wrapper_box.height();
+                    test();
+                });
 
-            // 测试地图盒是否已入场
-            var test = function() {
-                scrollTop_px = $(para.scroll_obj_selector).scrollTop();
+                // 打开页面时，先执行一次测试。如果地图盒在可视范围内，则直接显示。
+                test();
+            }
+        },
+        // 增加定点标注
+        PointMarker: function(opt) {
+            var that = this;
 
-                // console.log(map_top_px + ":" + scrollTop_px + ":" + wrapper_height_px);
-                if (map_top_px - scrollTop_px < wrapper_height_px - map_height_px / 2) { // 减去地图盒高度的一半是为了兼容安卓微信浏览器。等于地图盒入场一半高度时，才会加载地图
-                    showMap.apply(_this);
-                    listenScroll = false;
+            var opt_default = {
+                clearOld: true, // 清空原有marker
+                Zoom: 14,
+                Points: [{
+                    Keywords: "北京天安门",
+                    Bounce: true,
+                    click_callback: null
+                }]
+            };
+
+            opt = $.extend(opt_default, opt);
+
+            var marking = function() {
+
+                // 创建地址解析器实例
+                var myGeo = new BMap.Geocoder();
+
+                // 遍历点，标注
+                var i = 0,
+                    len = opt.Points.length;
+
+                var makingPoints = (function() {
+
+                    return function(_i) {
+
+                        // 将地址解析结果显示在地图上,并调整地图视野
+                        myGeo.getPoint(opt.Points[_i].Keywords, function(point) {
+                            if (point) {
+                                if (_i === 0)
+                                    that.map_obj.centerAndZoom(point, opt.Zoom);
+                                var marker = new BMap.Marker(point); // 创建标注   
+                                if (opt.Points[_i].Bounce)
+                                    marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画 
+
+                                if (opt.Points[_i].click_callback)
+                                    marker.addEventListener("click", opt.Points[_i].click_callback);
+
+                                that.map_obj.addOverlay(marker);
+                            }
+                        }, opt.CurrentCity);
+                    };
+
+                })();
+
+                for (; i < len; i++) {
+                    makingPoints(i);
                 }
             };
 
-            // 监听scroll盒滚动
-            $(para.scroll_obj_selector).scroll(function() {
-                if (!listenScroll)
-                    return;
-                wrapper_height_px = $(para.scroll_obj_selector).height();
-                test();
-            });
+            that.PrepareDoAction.apply(that, [marking]);
+        },
+        // 关键词搜索，增加搜索结果
+        Search: function(opt) {
+            var that = this;
 
-            // 打开页面时，先执行一次测试。如果地图盒在可视范围内，则直接显示。
-            test();
-        }
-    },
-
-    // 定点标注
-    PointMarker: function(map, para) {
-        // 创建地址解析器实例
-        var myGeo = new BMap.Geocoder();
-
-        // 遍历点，标注
-        var i = 0,
-            len = para.Points.length;
-
-        var makingPoints = (function() {
-
-            return function(_i) {
-                // 将地址解析结果显示在地图上,并调整地图视野
-                myGeo.getPoint(para.Points[_i].Keywords, function(point) {
-                    if (point) {
-                        if (_i === 0)
-                            map.centerAndZoom(point, para.Zoom);
-                        var marker = new BMap.Marker(point); // 创建标注   
-                        if (para.Points[_i].Bounce)
-                            marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画 
-
-                        if (para.Points[_i].click_callback)
-                            marker.addEventListener("click", para.Points[_i].click_callback);
-
-                        map.addOverlay(marker);
-                    }
-                }, para.CurrentCity);
+            var opt_default = {
+                SearchKeywords: "北京天安门"
             };
 
-        })();
+            opt = $.extend(opt_default, opt);
 
-        for (; i < len; i++) {
-            makingPoints(i);
+            var searching = function() {
+
+                var local = new BMap.LocalSearch(that.map_obj, {
+                    renderOptions: { map: that.map_obj }
+                });
+                local.search(opt.SearchKeywords);
+            };
+
+            that.PrepareDoAction.apply(that, [searching]);
         }
-    },
-
-    // 关键词搜索
-    Search: function(map, para) {
-
-        var local = new BMap.LocalSearch(map, {
-            renderOptions: { map: map }
-        });
-        local.search(para.SearchKeywords);
-    }
-};
+    };
+}
 
 if (typeof define === "function" && define.amd) {
     define(["http://api.map.baidu.com/getscript?v=2.0&ak=cQoqZZ4o1Yy96sEiIlIVkkek"], function() {
