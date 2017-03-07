@@ -2,29 +2,133 @@ require(["baidu_map", "/inc/jquery.min.js"], function($baidu_map) {
 
     $(function() {
 
-        var baidu_map_para = {
-            map_obj_id: "baidu_map", // 地图容器ID。无默认值。
-            enableScrollWheelZoom: false, // 允许滚轮缩放。默认值：true
-            NavigationControl: true, // 左上角缩放尺。默认值：true
-            ScaleControl: false, // 左下角比例尺。默认值：true
-            OverviewMapControl: false, // 右下角小地图：true
-            CurrentCity: "北京", // 当前城市。默认值：北京
-            MapTypeControl: true, // 右上角地图种类，仅当设置当前城市后可用。默认值：true
+        var map1 = new $baidu_map();
+        map1.init({
+            map_obj_id: "baidu_map_1",
+            MapTypeControl: false
+        });
+        map1.PointMarker({
+            Zoom: 14,
             Points: [{
-                Keywords: "盈科中心 北京市朝阳区工人体育场北路甲2号",
-                Bounce: true,
+                Keywords: "银河SOHO",
+                Bounce: false,
                 click_callback: null
             }, {
-                Keywords: "美林大厦",
-                Bounce: false,
-                click_callback: function() {
-                    alert("这是美林大厦");
-                }
-            }],
-            // SearchKeywords: "礼士宾馆", // 搜索关键词。无默认值
-            Zoom: 16 // 默认缩放比例。默认值：16
-        }
+                Keywords: "悠唐生活广场",
+                Label: "点marker弹层",
+                Bounce: true,
+                click_callback: function(marker) {
+                    console.log("这是悠唐生活广场");
 
-        baidu_map.init(baidu_map_para);
+                    map1.PointMarkerInfo.apply(map1, [{
+                        marker: marker, // 必须有
+                        content: "这里是概述，支持html标签", // 内容，支持html标签
+                        para: {
+                            title: "悠唐", //标题
+                            width: 300, //宽度
+                            height: 50, //高度
+                            panel: "panel", //检索结果面板
+                            enableAutoPan: true, //自动平移
+                            searchTypes: [
+                                BMAPLIB_TAB_SEARCH, //周边检索
+                                BMAPLIB_TAB_TO_HERE, //到这里去
+                                BMAPLIB_TAB_FROM_HERE //从这里出发
+                            ]
+                        }
+                    }]);
+                }
+            }]
+        });
+        // map1.Search({
+        //     SearchKeywords: "SOHO"
+        // });
+
+        var map2 = new $baidu_map();
+        map2.init({
+            map_obj_id: "baidu_map_2",
+            MapClickEnable: false
+        });
+        map2.PointMarker({
+            Points: [{
+                Keywords: "望京SOHO",
+                Bounce: true,
+                Label: "SOHO",
+                click_callback: null
+            }, {
+                Keywords: "福码大厦",
+                Bounce: true,
+                Label: "福码",
+                click_callback: null
+            }]
+        });
+
+        $("a.switch").click(function() {
+            map1.PointMarker({
+                clearOld: true,
+                Zoom: 12,
+                Points: [{
+                    Keywords: "建外SOHO",
+                    click_callback: null
+                }]
+            });
+            return false;
+        });
+
+        $("a.showLayer").click(function() {
+            showLayer("朝新嘉园");
+
+            return false;
+        });
+
+        $("a.showLayer2").click(function() {
+            showLayer("麦当劳");
+            return false;
+        })
+
+        var showLayer = function(keyword) {
+
+            var opt = {
+                // z_index: 弹层的z - index。 图片 / 图文内容层为z_index + 1。 默认400
+                //     bg_color: 背景层16进制颜色。 默认 #000000
+                // bg_opacity: 背景层透明度，0～1。默认0.8
+                showKind: 2,
+                // Pics: showKind = 1 时有效。 图片路径列表， 数组。 如["/images/001.jpg", "/images/002.png"]。 无默认值
+                // Pics_scroll_speed: showKind = 1 时有效。 图片切换时的速度。 毫秒。 默认500。 移动端建议设置为100 - 200， 过慢会有卡顿的现象
+                // Pics_arrow_left: showKind = 1 时有效。 图片切换 左箭头图片路径。 默认 / inc / LayerShow_arrow_left.png。
+                // Pics_arrow_right: showKind = 1 时有效。 图片切换 右箭头图片路径。 默认 / inc / LayerShow_arrow_left.png。
+                // callback_image_click: showKind = 1 时有效。 图片点击回调： 1 - 关闭弹层 | 2 - 下一张图片 | function(li_obj) - 自定义方法。 默认 "1"
+                info_content: "<div id=\"baidu_map_3\" style=\"width:300px;height:300px;\"></div>",
+                // info_box_width_per: showKind = 2 时有效， 内容盒宽度百分比。 默认80
+                // info_box_height_per: showKind = 2 时有效， 内容盒高度百分比。 默认90
+                // info_box_radius: showKind = 2 时有效， 内容盒是否圆角。 默认true
+                // info_box_bg: showKind = 2 时有效， 内容盒背景。 默认 "#ffffff"
+                // info_box_padding_px: showKind = 2 时有效， 内容盒padding。 默认20
+                // info_box_fontSize: showKind = 2 时有效， 内容盒字体大小。 默认 "14px"
+                // info_box_fontColor: showKind = 2 时有效， 内容盒字体颜色。 默认 "#333"
+                // info_box_lineHeight: showKind = 2 时有效， 内容盒行间距。 默认 "30px"
+                info_box_use_JRoll: false,
+                // Pics_close_show: true / false。 显示关闭按钮。 默认true
+                // Pics_close_path: 关闭按钮图片路径。 默认 / inc / LayerShow_close.png。
+                // callback_before: 弹层前回调。 如显示loading层。 无默认
+                // callback_close: 关闭弹层后的回调。 没想好如什么。 无默认
+                callback_success: function() {
+                    var map3 = new $baidu_map();
+                    map3.init({
+                        map_obj_id: "baidu_map_3"
+                    });
+                    map3.PointMarker({
+                        Zoom: 16,
+                        Points: [{
+                            Keywords: keyword,
+                            Bounce: true,
+                            click_callback: null
+                        }]
+                    });
+                }
+            };
+
+            // 显示
+            LayerShow.show(opt);
+        }
     });
 });

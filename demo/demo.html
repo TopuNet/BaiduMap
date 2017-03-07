@@ -10,13 +10,14 @@
 </head>
 
 <body>
-    <p>地图一：银河SOHO&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" class="switch">切换建外SOHO</a></p>
+    <p>地图一（底图可点）：银河SOHO&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" class="switch">切换建外SOHO</a></p>
     <div id="baidu_map_1" style="width:600px; height:200px;"></div>
-    <p>地图二：望京SOHO + 福码大厦</p>
+    <p>地图二（底图禁点）：望京SOHO + 福码大厦</p>
     <div id="baidu_map_2" style="width:600px; height:200px;"></div>
     <p>地图三：朝新嘉园&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" class="showLayer">点我弹层</a></p>
     <p>地图四：劲松麦当劳&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" class="showLayer2">点我弹层</a></p>
     <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=cQoqZZ4o1Yy96sEiIlIVkkek"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js"></script>
     <script type="text/javascript" src="/inc/jquery.min.js"></script>
     <script type="text/javascript" src="/jq/baidu_map.js"></script>
     <script type="text/javascript" src="/jq/LayerShow.js"></script>
@@ -31,45 +32,66 @@
             Zoom: 14,
             Points: [{
                 Keywords: "银河SOHO",
-                Bounce: true,
+                Bounce: false,
                 click_callback: null
             }, {
                 Keywords: "悠唐生活广场",
-                Bounce: false,
-                click_callback: function(){
+                Label: "点marker弹层",
+                Bounce: true,
+                click_callback: function(marker) {
                     console.log("这是悠唐生活广场");
+
+                    map1.PointMarkerInfo.apply(map1, [{
+                        marker: marker, // 必须有
+                        content: "这里是概述，支持html标签", // 内容，支持html标签
+                        para: {
+                            title: "悠唐", //标题
+                            width: 300, //宽度
+                            height: 50, //高度
+                            // panel: "panel", //检索结果面板
+                            enableAutoPan: true, //自动平移
+                            searchTypes: [
+                                BMAPLIB_TAB_SEARCH, //周边检索
+                                BMAPLIB_TAB_TO_HERE, //到这里去
+                                BMAPLIB_TAB_FROM_HERE //从这里出发
+                            ]
+                        }
+                    }]);
                 }
             }]
         });
         // map1.Search({
-        //     SearchKeywords: "SOHO"
+        //     SearchKeywords: "礼士宾馆"
+        // });
+        // map1.Search({
+        //     SearchKeywords: "建国门"
         // });
 
         var map2 = new baidu_map();
         map2.init({
-            map_obj_id: "baidu_map_2"
+            map_obj_id: "baidu_map_2",
+            MapClickEnable: false
         });
         map2.PointMarker({
             Points: [{
                 Keywords: "望京SOHO",
                 Bounce: true,
+                Label: "SOHO",
                 click_callback: null
             }, {
                 Keywords: "福码大厦",
-                Bounce: false,
+                Bounce: true,
+                Label: "福码",
                 click_callback: null
             }]
         });
 
         $("a.switch").click(function() {
-            // map1.init({
-            //     map_obj_id: "baidu_map_1"
-            // });
             map1.PointMarker({
+                clearOld: true,
                 Zoom: 12,
                 Points: [{
                     Keywords: "建外SOHO",
-                    Bounce: false,
                     click_callback: null
                 }]
             });
@@ -82,8 +104,8 @@
             return false;
         });
 
-        $("a.showLayer2").click(function(){
-            showLayer("劲松麦当劳");
+        $("a.showLayer2").click(function() {
+            showLayer("麦当劳");
             return false;
         })
 

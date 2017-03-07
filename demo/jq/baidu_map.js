@@ -1,9 +1,8 @@
-// v3.1.1
+// v3.2.1
 /*
     that:{
         opt_init: init方法接收的参数,
-        map_obj: map对象,
-
+        map_obj: map对象
     }
 */
 function baidu_map() {
@@ -23,6 +22,7 @@ function baidu_map() {
                 OverviewMapControl: true, // 右下角小地图：true
                 CurrentCity: "北京", // 当前城市。默认值：北京
                 MapTypeControl: true, // 右上角地图种类，仅当设置当前城市后可用。默认值：true
+                MapClickEnable: true // 底图可点
             };
             that.opt_init = $.extend(opt_default, opt);
 
@@ -36,11 +36,13 @@ function baidu_map() {
         createMap: function() {
             var that = this;
 
-            that.map_obj = new BMap.Map(that.opt_init.map_obj_id); // 创建地图实例 
+            that.map_obj = new BMap.Map(that.opt_init.map_obj_id, { enableMapClick: that.opt_init.MapClickEnable }); // 创建地图实例 
 
             // 重写样式
             $("div.BMap_bubble_content span,div.BMap_bubble_content a").css("font-size", "12px!important");
             $("div.BMap_bubble_content span img").css("display", "inline!important");
+
+            that.map_obj.centerAndZoom(new BMap.Point(116.404, 39.915), 1);
         },
         // 设置地图属性
         setMapAttr: function(opt) {
@@ -59,7 +61,7 @@ function baidu_map() {
             if (that.opt_init.CurrentCity)
                 that.map_obj.setCurrentCity(that.opt_init.CurrentCity); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
         },
-        // 根据参数决定直接执行方法；或是监听滚动，在确定地图入场后再执行方法。callback为要执行的方法
+        // 根据参数决定直接执行方法 或 监听滚动，在确定地图入场后再执行方法。callback为要执行的方法
         PrepareDoAction: function(callback) {
             var that = this;
 
@@ -109,7 +111,7 @@ function baidu_map() {
             var that = this;
 
             var opt_default = {
-                clearOld: true, // 清空原有marker
+                clearOld: true, // 清除原有marker
                 Zoom: 14,
                 Points: [{
                     Keywords: "北京天安门",
@@ -120,44 +122,90 @@ function baidu_map() {
 
             opt = $.extend(opt_default, opt);
 
+            if (opt.clearOld)
+                that.map_obj.clearOverlays();
+
             var marking = function() {
 
                 // 创建地址解析器实例
                 var myGeo = new BMap.Geocoder();
 
-                // 遍历点，标注
-                var i = 0,
-                    len = opt.Points.length;
+                var makingPoints = function(_i) {
 
-                var makingPoints = (function() {
+                    if (_i >= opt.Points.length) {
+                        return;
+                    }
 
-                    return function(_i) {
+                    // 将地址解析结果显示在地图上,并调整地图视野
+                    myGeo.getPoint(opt.Points[_i].Keywords, function(point) {
 
-                        // 将地址解析结果显示在地图上,并调整地图视野
-                        myGeo.getPoint(opt.Points[_i].Keywords, function(point) {
-                            if (point) {
-                                if (_i === 0)
-                                    that.map_obj.centerAndZoom(point, opt.Zoom);
-                                var marker = new BMap.Marker(point); // 创建标注   
-                                if (opt.Points[_i].Bounce)
-                                    marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画 
+                        if (point === null) {
+                            console.log("baidu_map", "135", "地点未找到: ", opt.Points[_i].Keywords);
+                            opt.Points[_i].Keywords = "北京天安门";
+                            makingPoints(_i);
+                        } else {
+                            var marker = new BMap.Marker(point); // 创建标注   
 
-                                if (opt.Points[_i].click_callback)
-                                    marker.addEventListener("click", opt.Points[_i].click_callback);
+                            if (opt.Points[_i].click_callback)
+                                marker.addEventListener("click", function(e) {
+                                    opt.Points[_i].click_callback(marker);
+                                });
 
-                                that.map_obj.addOverlay(marker);
+                            that.map_obj.addOverlay(marker);
+
+                            if (opt.Points[_i].Bounce)
+                                marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画 
+
+                            if (opt.Points[_i].Label) {
+                                var label = new BMap.Label(opt.Points[_i].Label, { offset: new BMap.Size(20, -10) });
+                                marker.setLabel(label);
                             }
-                        }, opt.CurrentCity);
-                    };
 
-                })();
+                            if (_i === 0)
+                                that.map_obj.centerAndZoom(point, opt.Zoom);
 
-                for (; i < len; i++) {
-                    makingPoints(i);
-                }
+                            makingPoints(_i + 1);
+                        }
+                    }, opt.CurrentCity);
+
+                };
+
+                makingPoints(0);
             };
 
             that.PrepareDoAction.apply(that, [marking]);
+        },
+        PointMarkerInfo: function(opt) {
+            var that = this;
+
+            var opt_default = {
+                marker: null,
+                content: null, // 内容，支持html标签
+            };
+
+            var para_default = {
+                title: "北京天安门", //标题
+                width: 300, //宽度
+                height: 50, //content高度
+                panel: "panel", //检索结果面板
+                enableAutoPan: true, //自动平移
+                searchTypes: [
+                    BMAPLIB_TAB_SEARCH, //周边检索
+                    BMAPLIB_TAB_TO_HERE, //到这里去
+                    BMAPLIB_TAB_FROM_HERE //从这里出发
+                ]
+            }
+
+            var opt = $.extend(opt_default, opt);
+            opt.para = $.extend(para_default, opt.para);
+
+            if (!that.map_obj || opt.marker === null)
+                return;
+
+            var searchInfoWindow = null;
+            searchInfoWindow = new BMapLib.SearchInfoWindow(that.map_obj, opt.content, opt.para);
+
+            searchInfoWindow.open(opt.marker);
         },
         // 关键词搜索，增加搜索结果
         Search: function(opt) {
@@ -182,8 +230,17 @@ function baidu_map() {
     };
 }
 
+(function(path) {
+    var a = document.createElement("link");
+    a.type = "text/css";
+    a.rel = "stylesheet";
+    a.href = path;
+    var head = document.getElementsByTagName("head")[0];
+    head.appendChild(a);
+})("http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.css");
+
 if (typeof define === "function" && define.amd) {
-    define(["http://api.map.baidu.com/getscript?v=2.0&ak=cQoqZZ4o1Yy96sEiIlIVkkek"], function() {
+    define(function() {
         return baidu_map;
     });
 }
