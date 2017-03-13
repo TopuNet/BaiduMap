@@ -180,7 +180,7 @@ function baidu_map() {
 
             var opt_default = {
                 marker: null,
-                content: null, // 内容，支持html标签
+                content: null // 内容，支持html标签
             };
 
             var para_default = {
