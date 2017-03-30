@@ -1,4 +1,4 @@
-// v3.2.2
+// v3.3.1
 /*
     that:{
         opt_init: init方法接收的参数,
@@ -22,7 +22,8 @@ function baidu_map() {
                 OverviewMapControl: true, // 右下角小地图：true
                 CurrentCity: "北京", // 当前城市。默认值：北京
                 MapTypeControl: true, // 右上角地图种类，仅当设置当前城市后可用。默认值：true
-                MapClickEnable: true // 底图可点
+                MapClickEnable: true, // 底图可点
+                FontStyle: "font-size: 12px;" // 文字样式。默认值：font-size:12px;
             };
             that.opt_init = $.extend(opt_default, opt);
 
@@ -31,6 +32,9 @@ function baidu_map() {
 
             // 设置地图属性
             that.setMapAttr.apply(that);
+
+            // 设置文字样式
+            that.setFontStyle.apply(that);
         },
         // 创建map对象
         createMap: function() {
@@ -226,6 +230,17 @@ function baidu_map() {
             };
 
             that.PrepareDoAction.apply(that, [searching]);
+        },
+        // 设置文字样式
+        setFontStyle: function() {
+            var that = this;
+            var style = document.getElementById("baidu_map_style");
+            if (style)
+                style.parentNode.removeChild(style);
+            style = document.createElement("style");
+            style.id = "baidu_map_style";
+            style.innerHTML = ".BMapLib_SearchInfoWindow *,.tangram-suggestion-main *{" + that.opt_init.FontStyle + "}";
+            document.getElementsByTagName("head")[0].appendChild(style);
         }
     };
 }

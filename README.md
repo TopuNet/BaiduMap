@@ -1,4 +1,4 @@
-# 百度地图 JS插件 v3.2.2
+# 百度地图 JS插件 v3.3.1
 ###安装：npm install TopuNet-BaiduMap
 
 文件结构：
@@ -40,10 +40,11 @@ requireJS引用
             OverviewMapControl: true, // 右下角小地图：true
             CurrentCity: "北京", // 当前城市。默认值：北京
             MapTypeControl: true, // 右上角地图种类，仅当设置当前城市后可用。默认值：true
-            MapClickEnable: true // 底图可点
+            MapClickEnable: true, // 底图可点
+            FontStyle: "font-size: 12px;" // 文字样式。默认值：font-size:12px;
         });
 
-        // 为地图增加气泡标记点，并将第一个标记点作为地图中心点，同时调整zoom。可反复调用。调用前如想清空地图，可调用init方法
+        // 为地图增加气泡标记点，并将第一个标记点作为地图中心点，同时调整zoom。可反复调用。
         map1.PointMarker({
             clearOld: true, // 清除原有marker
             Zoom: 14, // 调整地图的zoom
@@ -94,6 +95,10 @@ requireJS引用
 
 更新日志：
 -------------
+v3.3.1
+
+        1. 增加参数FontStyle，设置信息窗的文字样式
+
 v3.2.2
 
         1. 史拓成修改line #183 多了一个逗号，引起的ie7报错
