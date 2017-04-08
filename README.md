@@ -1,5 +1,5 @@
 # 百度地图 JS插件 v3.3.1
-###安装：npm install TopuNet-BaiduMap
+### 安装：npm install TopuNet-BaiduMap
 
 文件结构：
 -------------
