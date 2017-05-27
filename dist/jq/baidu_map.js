@@ -1,4 +1,4 @@
-// v3.3.1
+// v3.3.2
 /*
     that:{
         opt_init: init方法接收的参数,
@@ -234,13 +234,12 @@ function baidu_map() {
         // 设置文字样式
         setFontStyle: function() {
             var that = this;
-            var style = document.getElementById("baidu_map_style");
-            if (style)
-                style.parentNode.removeChild(style);
-            style = document.createElement("style");
-            style.id = "baidu_map_style";
-            style.innerHTML = ".BMapLib_SearchInfoWindow *,.tangram-suggestion-main *{" + that.opt_init.FontStyle + "}";
-            document.getElementsByTagName("head")[0].appendChild(style);
+            var style_obj = document.getElementById("baidu_map_style");
+            if (style_obj)
+                return;
+            style_obj = document.createElement("div");
+            style_obj.innerHTML = "xxx<style id=\"baidu_map_style\">.BMapLib_SearchInfoWindow *,.tangram-suggestion-main *{" + that.opt_init.FontStyle + "}</style>"
+            document.getElementsByTagName("head")[0].appendChild(style_obj.lastChild);
         }
     };
 }
