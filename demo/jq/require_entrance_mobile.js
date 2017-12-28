@@ -28,38 +28,46 @@ require(["/inc/zepto.min.js", "baidu_map", "mobile_stop_moved", "landscape_mask"
 
         map_obj.init(baidu_map_para);
 
-        map_obj.PointMarker({
-            Zoom: 14,
-            Points: [{
-                Keywords: "银河SOHO",
-                Bounce: false,
-                click_callback: null
-            }, {
-                Keywords: "悠唐生活广场",
-                Label: "点marker弹层",
-                Bounce: true,
-                click_callback: function(marker) {
-                    console.log("这是悠唐生活广场");
+        map_obj.getCurrentPos(function(point) {
+            map_obj.PointMarker({
+                Zoom: 14,
+                Points: [{
+                    Keywords: "银河SOHO",
+                    Bounce: false,
+                    click_callback: function(marker) {
 
-                    map_obj.PointMarkerInfo.apply(map_obj, [{
-                        marker: marker, // 必须有
-                        content: "这里是概述，支持html标签", // 内容，支持html标签
-                        para: {
-                            title: "悠唐", //标题
-                            width: 300, //宽度
-                            height: 50, //高度
-                            // panel: "panel", //检索结果面板
-                            enableAutoPan: true, //自动平移
-                            searchTypes: [
-                                BMAPLIB_TAB_SEARCH, //周边检索
-                                BMAPLIB_TAB_TO_HERE, //到这里去
-                                BMAPLIB_TAB_FROM_HERE //从这里出发
-                            ]
-                        }
-                    }]);
-                }
-            }]
+                        console.log("距离：" + map_obj.getDistance(point, marker.point));
+                        // map_obj.locationToNavigator(point, marker.point);
+                        // location.href = "http://api.map.baidu.com/direction?destination=39.89778,116.709684&mode=driving&region=北京&output=html";
+                    }
+                }, {
+                    Keywords: "悠唐生活广场",
+                    Label: "点marker弹层",
+                    Bounce: true,
+                    click_callback: function(marker) {
+                        console.log("这是悠唐生活广场");
+
+                        map_obj.PointMarkerInfo.apply(map_obj, [{
+                            marker: marker, // 必须有
+                            content: "这里是概述，支持html标签", // 内容，支持html标签
+                            para: {
+                                title: "悠唐", //标题
+                                width: 300, //宽度
+                                height: 50, //高度
+                                // panel: "panel", //检索结果面板
+                                enableAutoPan: true, //自动平移
+                                searchTypes: [
+                                    BMAPLIB_TAB_SEARCH, //周边检索
+                                    BMAPLIB_TAB_TO_HERE, //到这里去
+                                    BMAPLIB_TAB_FROM_HERE //从这里出发
+                                ]
+                            }
+                        }]);
+                    }
+                }]
+            });
         });
+
 
         /*
             Points: [{

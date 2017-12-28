@@ -1,4 +1,4 @@
-// v3.3.2
+// v3.4.1
 /*
     that:{
         opt_init: init方法接收的参数,
@@ -110,6 +110,38 @@ function baidu_map() {
                 test();
             }
         },
+        // 定位（获得当前坐标）
+        // @callback:function(point{lat,lng}){}
+        getCurrentPos: function(callback) {
+
+            var geolocation = new BMap.Geolocation();
+            geolocation.getCurrentPosition(function(r) {
+                if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+                    if (callback)
+                        callback(r.point);
+                } else {
+                    console.log('baiduMap: ' + this.getStatus());
+                }
+            });
+        },
+        // 跳转到导航页
+        // @CurrentPos{lat,lng}:当前位置坐标，可以用getCurrentPos获得
+        // @DesPos{lat,lng}:目的地位置坐标，可以直接使用marker.point
+        locationToNavigator: function(CurrentPos, DesPos) {
+            location.href = "http://api.map.baidu.com/direction?origin=" + CurrentPos.lat + "," + CurrentPos.lng + "&destination=" + DesPos.lat + "," + DesPos.lng + "&mode=driving&region=北京&output=html";
+        },
+        // 获得两点距离，单位为m或km
+        // @point_a,point_b:{lat,lng}
+        getDistance: function(point_a, point_b) {
+            var distance = parseInt(BMapLib.GeoUtils.getDistance(point_a, point_b));
+
+            if (distance > 1000)
+                distance = (parseInt(distance / 10) / 100) + "km";
+            else
+                distance = distance.toString() + "m";
+
+            return distance;
+        },
         // 增加定点标注
         PointMarker: function(opt) {
             var that = this;
@@ -152,6 +184,7 @@ function baidu_map() {
 
                             if (opt.Points[_i].click_callback)
                                 marker.addEventListener("click", function(e) {
+                                    // console.dir(point,marker);
                                     opt.Points[_i].click_callback(marker);
                                 });
 
@@ -198,9 +231,9 @@ function baidu_map() {
                     BMAPLIB_TAB_TO_HERE, //到这里去
                     BMAPLIB_TAB_FROM_HERE //从这里出发
                 ]
-            }
+            };
 
-            var opt = $.extend(opt_default, opt);
+            opt = $.extend(opt_default, opt);
             opt.para = $.extend(para_default, opt.para);
 
             if (!that.map_obj || opt.marker === null)
@@ -238,7 +271,7 @@ function baidu_map() {
             if (style_obj)
                 return;
             style_obj = document.createElement("div");
-            style_obj.innerHTML = "xxx<style id=\"baidu_map_style\">.BMapLib_SearchInfoWindow *,.tangram-suggestion-main *{" + that.opt_init.FontStyle + "}</style>"
+            style_obj.innerHTML = "xxx<style id=\"baidu_map_style\">.BMapLib_SearchInfoWindow *,.tangram-suggestion-main *{" + that.opt_init.FontStyle + "}</style>";
             document.getElementsByTagName("head")[0].appendChild(style_obj.lastChild);
         }
     };

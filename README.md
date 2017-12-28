@@ -1,4 +1,4 @@
-# 百度地图 JS插件 v3.3.2
+# 百度地图 JS插件 v3.4.1
 ### 安装：npm install TopuNet-BaiduMap
 
 文件结构：
@@ -92,6 +92,35 @@ requireJS引用
             map_obj_id: "baidu_map_2"
         });
 
+        // 定位（获得当前坐标）
+        // @point{lat,lng}: 坐标
+        map1.getCurrentPos(function(point){
+            console.log(point.lat,point.lng);
+        });
+
+        // 跳转到导航页
+        var CurrentPos={
+            lat: 当前坐标lat,
+            lng: 当前坐标lng
+        };
+        var DesPos={
+            lat: 目的坐标lat,
+            lng: 目的坐标lng
+        };
+        map1.locationToNavigator(CurrentPos, DesPos);
+
+        // 获得两点距离，单位为m或km
+        // @point_a,point_b:{lat,lng}
+        var point_a={
+            lat: 点a坐标lat,
+            lng: 点a坐标lng
+        };
+        var point_b={
+            lat: 点b坐标lat,
+            lng: 点b坐标lng
+        };
+        var distance = map1.getDistance(point_a, point_b);
+
 
 兼容性：
 -------------
@@ -104,6 +133,12 @@ requireJS引用
 
 更新日志：
 -------------
+v3.4.1
+
+        1. 增加功能：获得当前坐标
+        2. 增加功能：跳转到导航页
+        3. 增加功能：两点测距
+
 v3.3.2
 
         1. 修改向head中插入style的代码，解决ie7、8报错的bug
