@@ -1,4 +1,4 @@
-# 百度地图 JS插件 v3.4.1
+# 百度地图 JS插件 v3.5.1
 ### 安装：npm install TopuNet-BaiduMap
 
 文件结构：
@@ -10,15 +10,15 @@
 -------------
 原生引用
 
-        1. 页面底端引用 http://api.map.baidu.com/api?v=2.0&ak=cQoqZZ4o1Yy96sEiIlIVkkek
-        2. 后引用 http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js
+        1. 页面底端引用 https://api.map.baidu.com/api?v=2.0&ak=xxxxx（xxxxx需要去百度开放平台去注册申请）
+        2. 后引用 https://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js
         3. 后引用最新版 /inc/Jquery.min.js#1.x.x 或 zepto.min.js
         4. 后引用 /jq/baidu_map.js
 
 requireJS引用
 
-        1. 页面底端引用require.js前，引用 http://api.map.baidu.com/api?v=2.0&ak=cQoqZZ4o1Yy96sEiIlIVkkek
-        2. 后引用 http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js
+        1. 页面底端引用require.js前，引用 https://api.map.baidu.com/api?v=2.0&ak=xxxxx（xxxxx需要去百度开放平台去注册申请）
+        2. 后引用 https://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js
         3. 依赖baidu_map.js和jquery.min.js#1.x 或 zepto.min.js，成功后返回对象baidu_map
 
 功能配置及启用：
@@ -93,21 +93,46 @@ requireJS引用
         });
 
         // 定位（获得当前坐标）
+        // ios10+ 必须在设置-隐私-定位服务-safari网页打开权限。和是否全站https关系不大，微信浏览器没毛病。建议页面中用腾讯地图获取坐标[传送门————腾讯地图](https://github.com/TopuNet/qq_map)。
         // @point{lat,lng}: 坐标
         map1.getCurrentPos(function(point){
             console.log(point.lat,point.lng);
         });
 
-        // 跳转到导航页
-        var CurrentPos={
-            lat: 当前坐标lat,
-            lng: 当前坐标lng
-        };
-        var DesPos={
-            lat: 目的坐标lat,
-            lng: 目的坐标lng
-        };
-        map1.locationToNavigator(CurrentPos, DesPos);
+        // 打开百度/高德APP进行导航
+        // 在微信内被屏蔽，调用无反应。建议在微信内点击先跳至新页面，提示用safari打开，在Safari中执行此方法。——详见demo/demo_mobile.html
+        // ios10+ 唤起app时均会alert提示，无法自动打开app或跳到下载页。so取消自动跳到下载页的功能，建议在页面中给出下载入口。——详见demo/demo_mobile.html
+        /*
+            @opt = {
+                app: 0, // 1-ios百度地图 2-android百度地图 3-ios高德地图 4-android高德地图
+                mode: "driving", // app=1/2时有效 transit-公交 | driving-驾车(默认) | walking-步行
+                origin_city: "北京", // app=1/2时有效 出发城市，默认"北京"
+                origin_pos: { // app=1/2时有效 出发位置坐标，可以用getCurrentPos()获得当前坐标
+                    lat: 0,
+                    lng: 0
+                },
+                origin_title: "我的位置", // app=1/2时有效 出发位置名称，默认"我的位置"
+                destination_city: "北京", // app=1/2时有效 目的城市，默认"北京"
+                destination_pos: { // 目的位置坐标，可以用marker.point
+                    lat: 0,
+                    lng: 0
+                },
+                destination_title:"", // app=1/2时有效 目的位置名称，无默认值
+                callback_gotoStore: function(store_uri){} // 返回商城链接的回调，在跳转至app前执行
+            }
+        */
+        map1.locationToNavigator(opt);
+
+        // 【异步】百度转高德坐标api
+        // 注意： 有配额限制，不要像demo一样每次点击调用。
+        /*
+            @opt = {
+                key, // 去高德官方注册开发者，创建key（选择坐标转换）
+                lat,lng,
+                callback(coord) // 成功回调。接口返回错误时，console.log错误并不执行回调。@coord为数组[lng,lat] 对，我没有写反。
+            }
+        */
+        coord_Baidu2Amap(opt);
 
         // 获得两点距离，单位为m或km
         // @point_a,point_b:{lat,lng}
@@ -133,6 +158,14 @@ requireJS引用
 
 更新日志：
 -------------
+v3.5.1
+
+        1. 将跳转到导航页修改为唤起百度APP（利用百度APP的schema），并完善demo流程。
+        2. 增加唤起高德APP（利用高德APP的schema），并完善demo流程。仅此一项功能，还是一个webapi的服务，所以没有单做项目
+        3. 增加百度坐标转高德坐标的方法，非唤起高德APP时，作用不大。使用时需注意此服务有限额，不要反复调用。
+        4. js中引用的css改为https引用
+        5. demo中引用的api.js改为https引用
+
 v3.4.1
 
         1. 增加功能：获得当前坐标

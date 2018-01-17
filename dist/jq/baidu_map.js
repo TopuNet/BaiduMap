@@ -1,4 +1,4 @@
-// v3.4.1
+// v3.5.1
 /*
     that:{
         opt_init: init方法接收的参数,
@@ -124,11 +124,109 @@ function baidu_map() {
                 }
             });
         },
-        // 跳转到导航页
-        // @CurrentPos{lat,lng}:当前位置坐标，可以用getCurrentPos获得
-        // @DesPos{lat,lng}:目的地位置坐标，可以直接使用marker.point
-        locationToNavigator: function(CurrentPos, DesPos) {
-            location.href = "http://api.map.baidu.com/direction?origin=" + CurrentPos.lat + "," + CurrentPos.lng + "&destination=" + DesPos.lat + "," + DesPos.lng + "&mode=driving&region=北京&output=html";
+        // 打开百度/高德APP进行导航
+        /*
+            opt = {
+                app: 0, // 1-ios百度地图 2-android百度地图 3-ios高德地图 4-android高德地图
+                mode: "driving", // app=1/2时有效 transit-公交 | driving-驾车(默认) | walking-步行
+                origin_city: "北京", // app=1/2时有效 出发城市，默认"北京"
+                origin_pos: { // app=1/2时有效 出发位置坐标，可以用getCurrentPos()获得当前坐标
+                    lat: 0,
+                    lng: 0
+                },
+                origin_title: "我的位置", // app=1/2时有效 出发位置名称，默认"我的位置"
+                destination_city: "北京", // app=1/2时有效 目的城市，默认"北京"
+                destination_pos: { // 目的位置坐标，可以用marker.point
+                    lat: 0,
+                    lng: 0
+                },
+                destination_title:"", // app=1/2时有效 目的位置名称，无默认值
+                callback_gotoStore: function(store_uri){} // 返回商城链接的回调，在跳转至app前执行
+            }
+        */
+        locationToNavigator: function(opt) {
+            var opt_default = {
+                app: 0,
+                mode: "driving",
+                origin_city: "",
+                origin_pos: {
+                    lat: 0,
+                    lng: 0
+                },
+                origin_title: "我的位置",
+                destination_city: "北京",
+                destination_pos: {
+                    lat: 0,
+                    lng: 0
+                },
+                destination_title: ""
+            };
+            opt = $.extend(opt_default, opt);
+            var schema,
+                store_uri,
+                app_source = "TopuMap";
+            switch (opt.app.toString()) {
+                case "1":
+                    schema = "baidumap";
+                    store_uri = "https://itunes.apple.com/cn/app/%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BE-%E5%87%BA%E8%A1%8C%E5%AF%BC%E8%88%AA%E5%BF%85%E5%A4%87%E7%9A%84%E6%99%BA%E8%83%BD%E8%B7%AF%E7%BA%BF%E8%A7%84%E5%88%92%E8%BD%AF%E4%BB%B6/id452186370?mt=8";
+                    break;
+                case "2":
+                    schema = "bdapp";
+                    store_uri = "http://sj.qq.com/myapp/detail.htm?apkName=com.baidu.BaiduMap";
+                    break;
+                case "3":
+                    schema = "iosamap";
+                    store_uri = "https://itunes.apple.com/cn/app/%E9%AB%98%E5%BE%B7%E5%9C%B0%E5%9B%BE-%E7%B2%BE%E5%87%86%E5%9C%B0%E5%9B%BE-%E5%AF%BC%E8%88%AA%E5%BF%85%E5%A4%87-%E6%99%BA%E8%83%BD%E4%BA%A4%E9%80%9A%E5%AF%BC%E8%88%AA%E5%9C%B0%E5%9B%BE/id461703208?mt=8";
+                    break;
+                case "4":
+                    schema = "androidamap";
+                    store_uri = "http://sj.qq.com/myapp/detail.htm?apkName=com.autonavi.minimap";
+                    break;
+                default:
+                    schema = "";
+                    store_uri = "";
+                    break;
+            }
+
+            if (schema === "")
+                console.log("baidu_map 166:", "请传入opt.app: 1-ios 2-android");
+            else {
+                var uri = schema;
+
+                switch (opt.app.toString()) {
+                    case "1":
+                    case "2":
+                        uri += "://map/direction?";
+                        uri += "origin=latlng:" + opt.origin_pos.lat + "," + opt.origin_pos.lng + "|name:" + opt.origin_title;
+                        // uri += "origin=latlng:39.92259415755889,116.41650639906512|name:" + opt.origin_title;
+                        // uri += "&destination=" + opt.destination_title;
+                        uri += "&destination=latlng:" + opt.destination_pos.lat + "," + opt.destination_pos.lng;
+                        if (opt.destination_title !== "")
+                            uri += "|name:" + opt.destination_title;
+                        uri += "&mode=" + opt.mode;
+                        uri += "&origin_city=" + opt.origin_city;
+                        uri += "&destination_city=" + opt.destination_city;
+                        uri += "&src=" + app_source;
+                        break;
+                    case "3":
+                    case "4":
+                        uri += "://navi?sourceApplication=" + app_source;
+                        uri += "&lat=" + opt.destination_pos.lat + "&lon=" + opt.destination_pos.lng;
+                        uri += "&dev=0&style=1";
+                        break;
+                    default:
+                        break;
+                }
+
+                if (opt.callback_gotoStore)
+                    opt.callback_gotoStore(store_uri);
+
+                // alert(uri);
+
+                // document.write(uri);
+
+                location.href = uri;
+            }
         },
         // 获得两点距离，单位为m或km
         // @point_a,point_b:{lat,lng}
@@ -271,8 +369,35 @@ function baidu_map() {
             if (style_obj)
                 return;
             style_obj = document.createElement("div");
-            style_obj.innerHTML = "xxx<style id=\"baidu_map_style\">.BMapLib_SearchInfoWindow *,.tangram-suggestion-main *{" + that.opt_init.FontStyle + "}</style>";
+            style_obj.innerHTML = "<style id=\"baidu_map_style\">.BMapLib_SearchInfoWindow *,.tangram-suggestion-main *{" + that.opt_init.FontStyle + "}</style>";
             document.getElementsByTagName("head")[0].appendChild(style_obj.lastChild);
+        },
+        // 【异步】百度转高德坐标api
+        // ***注意*** 有配额限制，不要像demo一样每次点击调用。
+        /*
+            @opt = {
+                key, // 去高德官方注册开发者，创建key（选择坐标转换）
+                lat,lng,
+                callback(coord) // 成功回调。接口返回错误时，console.log错误并不执行回调。@coord为数组[lng,lat] 对，我没有写反。
+            }
+        */
+        coord_Baidu2Amap: function(opt) {
+            $.ajax({
+                url: "http://restapi.amap.com/v3/assistant/coordinate/convert",
+                type: "get",
+                data: {
+                    key: opt.key,
+                    locations: opt.lng + "," + opt.lat,
+                    coordsys: "baidu",
+                },
+                success: function(result) {
+                    // console.log(result);
+                    if (result.status != "1")
+                        console.log(result);
+                    else if (opt.callback)
+                        opt.callback(result.locations.split(','));
+                }
+            });
         }
     };
 }
@@ -284,7 +409,7 @@ function baidu_map() {
     a.href = path;
     var head = document.getElementsByTagName("head")[0];
     head.appendChild(a);
-})("http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.css");
+})("https://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.css");
 
 if (typeof define === "function" && define.amd) {
     define(function() {
